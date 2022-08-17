@@ -11,7 +11,7 @@ const content = `${token}&${oopNum}&${timestamp}`
 
 const AESHelper = new AES256CBC(aeskey);
 
-
+console.log("得到一个新的秘钥：",AESHelper.newRandomKey());
 
 console.log("加密前：",content)
 
