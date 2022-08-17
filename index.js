@@ -4,9 +4,11 @@ import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import  debug from 'debug';
 import ZFJSignatureHelper from './ZFJSignatureHelper.js';
+import ResDataUtil from './ResDataUtil.js';
 
 import * as http from "http";
 import AES256CBC from "./AES256.js";
+import resDataUtil from "./ResDataUtil.js";
 
 const log = debug('app:server');
 const application = new Express();
@@ -35,36 +37,18 @@ application.get('/generateSignature', async (req, res) => {
 
 application.post("/order-notify", async (req, res) => {
     try {
-
         if (!req.body.signature) {
-            res.send({
-                resCode: 1,
-                resMsg: "需要签名",
-                resData: null
-            });
+           res.send( ResDataUtil.fail(1,"签名不能为空"));
         }
         const sh = new ZFJSignatureHelper("24971a98a3f233f1776a2f87773c3d26", req.body.token,req.body.oopNum, req.body.orderstatus, req.body.timestamp);
         if (sh.verifySignature(req.body.signature)) {
             // todo 可以校验订单并处理订单状态
-
-            res.send({
-                resCode: 0,
-                resMsg: "success",
-                resData: null
-            });
+           res.send( ResDataUtil.success(null));
         } else {
-            res.send({
-                resCode: 2,
-                resMsg: "签名错误",
-                resData: null
-            });
+           res.send( ResDataUtil.fail(2,"签名校验失败"));
         }
     }catch (e) {
-        res.send({
-            resCode: 99,
-            resMsg: e.message,
-            resData: null
-        });
+        res.send(ResDataUtil.fail(99,e.message));
     }
 });
 
