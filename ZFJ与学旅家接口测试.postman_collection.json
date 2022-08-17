@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "8255e04f-0bf2-4fb0-a062-2c48acf52980",
+		"name": "ZFJ与学旅家接口测试",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4985209"
+	},
+	"item": [
+		{
+			"name": "localhost:10241/generateSignature",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"token\":\"{{$randomUUID}}\",\r\n    \"oopNum\":\"{{$randomPhoneNumber}}\",\r\n     \"timestamp\":{{$timestamp}},\r\n    \"orderstatus\":{{$randomInt}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:10241/generateSignature",
+					"host": [
+						"localhost"
+					],
+					"port": "10241",
+					"path": [
+						"generateSignature"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:10241/order-notify",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"token\": \"f6a8da8c-ee1b-494b-ac42-9b57ec889098\",\r\n    \"oopNum\": \"325-482-8806\",\r\n    \"timestamp\": 1660729107,\r\n    \"orderstatus\": 414,\r\n    \"signature\": \"Mupe53BTQ5Dc4vO2gNIa0xuP3tclTYlYQB19Nnd2SohoQNYCk2uBQGEfNQqfGi/vGf74kmblkqH5qjMnes5odVeGn5gHQIGQEaheH0qD+Ik=\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:10241/order-notify",
+					"host": [
+						"localhost"
+					],
+					"port": "10241",
+					"path": [
+						"order-notify"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:10241/generate-aes-key",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:10241/generate-aes-key",
+					"host": [
+						"localhost"
+					],
+					"port": "10241",
+					"path": [
+						"generate-aes-key"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
