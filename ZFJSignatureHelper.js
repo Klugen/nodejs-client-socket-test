@@ -9,11 +9,22 @@ class ZFJSignatureHelper{
         this.orderstatus = orderstatus;
         this.AES256CBC = new AES256CBC(this.secretKey);
     }
+
+    /**
+     * 获取签名
+     * @returns {string}
+     */
     getSignature(){
         const content = `${this.token}&${this.oopNum}&${this.orderstatus}&${this.timestamp}`;
         const cyphertext = this.AES256CBC.encrypt(content);
         return cyphertext;
     }
+
+    /***
+     * 校验签名
+     * @param signature
+     * @returns {boolean}
+     */
     verifySignature(signature){
         const decrypttext = this.AES256CBC.decrypt(signature);
         const [token, oopNum,orderstatus, timestamp] = decrypttext.split("&");
