@@ -1,33 +1,69 @@
-import { v4 as uuidv4 } from 'uuid';
+import Express from 'express';
+import Helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import  debug from 'debug';
+import ZFJSignatureHelper from './ZFJSignatureHelper.js';
 
-console.log(token)
-const channel = process.argv[2];
-const client_name = process.argv[3];
+import * as http from "http"; http
 
-const socket = require("socket.io-client")("http://localhost:9000/s1",{
-    transports: ['websocket'],
-    query: {
-        channel: channel,
-    },
+const log = debug('app:server');
+const application = new Express();
+application.use(new Helmet());
+application.use(cookieParser());
+application.use(bodyParser.json());
+application.disable('x-powered-by');
 
-});
-socket.on("connect", (client) => {
-    console.log("connected",client);
-} );
-
-socket.on("connect_error", (err) => {
-    console.log("connect_error",err);
-    socket.io.opts.transports = ["polling", "websocket"];
-});
-
-socket.on("message", (data) => {
-    console.log("message",data);
-});
-
-socket.on("disconnect", (reason) => {
-    console.log("disconnect",reason);
-    socket.connect();
+application.get('/generateSignature', async (req, res) => {
+    try {
+        const signature = new ZFJSignatureHelper("24971a98a3f233f1776a2f87773c3d26",req.body.token, req.body.oopNum, req.body.orderstatus, req.body.timestamp).getSignature();
+        res.send({
+            ...req.body,
+            signature
+        });
+    }catch (e){
+       res.send(e.message) ;
+    }
 });
 
 
-socket.send(client_name,":",uuidv4().trim());
+application.post("/order-notify", async (req, res) => {
+    try {
+
+        if (!req.body.signature) {
+            res.send({
+                resCode: 1,
+                resMsg: "需要签名",
+                resData: null
+            });
+        }
+        const sh = new ZFJSignatureHelper("24971a98a3f233f1776a2f87773c3d26", req.body.token,req.body.oopNum, req.body.orderstatus, req.body.timestamp);
+        if (sh.verifySignature(req.body.signature)) {
+            // todo 可以校验订单并处理订单状态
+
+            res.send({
+                resCode: 0,
+                resMsg: "success",
+                resData: null
+            });
+        } else {
+            res.send({
+                resCode: 2,
+                resMsg: "签名错误",
+                resData: null
+            });
+        }
+    }catch (e) {
+        res.send({
+            resCode: 99,
+            resMsg: e.message,
+            resData: null
+        });
+    }
+});
+
+const server = http.createServer(application);
+
+server.listen(10241, () => {
+    log("Express server listening on port 10241");
+});

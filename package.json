@@ -3,7 +3,7 @@
   "name": "client-socket-test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "websocket-client.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,7 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.20.0",
+    "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",
+    "express": "^4.18.1",
+    "helmet": "^5.1.1",
     "socket.io-client": "^4.5.1",
     "uuid": "^8.3.2"
   }
