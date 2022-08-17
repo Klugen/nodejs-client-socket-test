@@ -1,4 +1,5 @@
 import AES256CBC from "./AES256.js";
+import {createHash} from 'crypto'
 
 class ZFJSignatureHelper{
     constructor(secretKey,token, oopNum, orderstatus,timestamp= Date.now()) {
@@ -16,7 +17,8 @@ class ZFJSignatureHelper{
      */
     getSignature(){
         const content = `${this.token}&${this.oopNum}&${this.orderstatus}&${this.timestamp}`;
-        const cyphertext = this.AES256CBC.encrypt(content);
+        const hash =createHash('sha256').update(content).digest('base64');
+        const cyphertext = this.AES256CBC.encrypt(hash);
         return cyphertext;
     }
 
@@ -26,9 +28,10 @@ class ZFJSignatureHelper{
      * @returns {boolean}
      */
     verifySignature(signature){
+        const content = `${this.token}&${this.oopNum}&${this.orderstatus}&${this.timestamp}`;
+        const hash =createHash('sha256').update(content).digest('base64');
         const decrypttext = this.AES256CBC.decrypt(signature);
-        const [token, oopNum,orderstatus, timestamp] = decrypttext.split("&");
-        return token == this.token && oopNum == this.oopNum&&this.orderstatus == orderstatus && timestamp == this.timestamp;
+        return hash === decrypttext;
     }
 
 }
