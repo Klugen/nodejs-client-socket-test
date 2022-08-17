@@ -5,7 +5,8 @@ import bodyParser from 'body-parser';
 import  debug from 'debug';
 import ZFJSignatureHelper from './ZFJSignatureHelper.js';
 
-import * as http from "http"; http
+import * as http from "http";
+import AES256CBC from "./AES256.js";
 
 const log = debug('app:server');
 const application = new Express();
@@ -13,6 +14,11 @@ application.use(new Helmet());
 application.use(cookieParser());
 application.use(bodyParser.json());
 application.disable('x-powered-by');
+
+application.get('/generate-aes-key', async (req, res) => {
+    const aesKey = new AES256CBC().newRandomKey();
+    res.send(aesKey);
+});
 
 application.get('/generateSignature', async (req, res) => {
     try {
