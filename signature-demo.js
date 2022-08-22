@@ -7,12 +7,14 @@ import crypto, {createHash} from "crypto";
  * @returns {string} 加密后的文本
  */
 function encrypt(key,text) {
+    console.log("aes 密钥：",key);
     let iv = Buffer.from(key, 'hex');
     let cipher = crypto.createCipheriv('aes-256-cbc', key, iv); //使用aes-256-cbc 加密方法
     let encrypted = cipher.update(text);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
     return  encrypted.toString('base64');
 }
+
 
 /**
  * 解密函数
@@ -40,13 +42,21 @@ function decrypt(key,text) {
  * @param timeStamp 时间戳
  * @returns {string} 签名
  */
-function getSignature(secretKey,token, oppID, oppNum, oppStage,opportunityOwner,timeStamp) {
-    const content = `${token}&${oppID}&${oppNum}&${oppStage}&${opportunityOwner}&${timeStamp}`; //计算签名的内容 请保证参数的顺序，参数参数之间用&分隔
+function getSignature(secretKey,token, oppID, oppNum, oppStage,oppOwner, ownerEmail,timeStamp) {
+    const content = `${token}&${oppID}&${oppNum}&${oppStage}&${oppOwner}&${ownerEmail}&${timeStamp}`; //计算签名的内容 请保证参数的顺序，参数参数之间用&分隔
+    console.log(content);
     const hash =createHash('sha256').update(content).digest('base64'); // 计算签名 ，使用sha256方式签名，并使用base64 方式进行编码
     const cyphertext = encrypt(secretKey,hash);// 加密签名
     return cyphertext; //返回签名
 }
 
+// '4196566f95524e4eb5d20c22da8f796a&123&O89898989&1&Amy&1660891321876';
+function getSignatureTest(secretKey) {
+    const content = '4196566f95524e4eb5d20c22da8f796a&123&O89898989&1&Amy&1660891073386'; //计算签名的内容 请保证参数的顺序，参数参数之间用&分隔
+    const hash =createHash('sha256').update(content).digest('base64'); // 计算签名 ，使用sha256方式签名，并使用base64 方式进行编码
+    const cyphertext = encrypt(secretKey,hash);// 加密签名
+    return cyphertext; //返回签名
+}
 /**
  * 验证签名
  * @param secretKey AES密钥
@@ -72,22 +82,23 @@ function verifySignature(secretKey,signature,token, oppID, oppNum, oppStage,oppo
 
 
 const secretKey = '27173bf042d043c411824eeb923f5f20'; // AES密钥
-const token = '4196566f95524e4eb5d20c22da8f796a'; // token
+const token = '0fd83b2a66424bfe8f4c9a035d5bc22d'; // token
 const timeStamp = Date.now(); // 时间戳
 /**
  * 即将发送的请求体
  */
 var postBody = {
     token: token,
-    oppID:'123',
+    oppID:'15231',
     oppNum:'O89898989',
     oppStage:1,
-    opportunityOwner:'Amy',
-    timeStamp:timeStamp
+    oppOwner:'Amy',
+    ownerEmail:'Amy@qq.com',
+    notifyTime:timeStamp
 }
-const signature = getSignature(secretKey ,postBody.token, postBody.oppID, postBody.oppNum, postBody.oppStage, postBody.opportunityOwner, postBody.timeStamp);
+const signature = getSignature(secretKey ,postBody.token, postBody.oppID, postBody.oppNum, postBody.oppStage, postBody.oppOwner,postBody.ownerEmail, postBody.notifyTime);
 postBody.signature = signature;
-
+console.log(JSON.stringify(postBody));
 
 
 
@@ -97,4 +108,3 @@ postBody.signature = signature;
 let verify = verifySignature(secretKey,signature,postBody.token, postBody.oppID, postBody.oppNum, postBody.oppStage, postBody.opportunityOwner, postBody.timeStamp);
 console.log(verify?'验证通过':'验证失败');
 
-console.log(crypto.randomBytes(16).toString('hex'));
